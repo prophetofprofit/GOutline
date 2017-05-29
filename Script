@@ -1,0 +1,70 @@
+function onOpen(e) {
+  DocumentApp.getUi().createAddonMenu()
+      .addItem('Start', 'showSidebar')
+      .addItem('Add', 'addItem')
+      .addToUi();
+}
+
+//function shows sidebar where user can click one of two buttons, remove or jump to 
+function showSidebar() {
+  var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
+      .setTitle('Outline');
+  DocumentApp.getUi().showSidebar(ui);
+}
+
+function addItem() {
+   // Insert a bookmark at the cursor position and log its ID.
+ var doc = DocumentApp.getActiveDocument();
+ var cursor = doc.getCursor();
+ var bookmark = doc.addBookmark(cursor);
+ Logger.log(bookmark.getId());
+}
+
+function removeItem() {
+//TODO
+}
+
+function locateNow() {
+//TODO
+}
+
+/**
+ * Gets the text the user has selected. If there is no selection,
+ * this function displays an error message.
+ *
+ * @return {Array.<string>} The selected text.
+ */
+function getSelectedText() {
+  var selection = DocumentApp.getActiveDocument().getSelection();
+  if (selection) {
+    var text = [];
+    var elements = selection.getSelectedElements();
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].isPartial()) {
+        var element = elements[i].getElement().asText();
+        var startIndex = elements[i].getStartOffset();
+        var endIndex = elements[i].getEndOffsetInclusive();
+
+        text.push(element.getText().substring(startIndex, endIndex + 1));
+      } else {
+        var element = elements[i].getElement();
+        // Only translate elements that can be edited as text; skip images and
+        // other non-text elements.
+        if (element.editAsText) {
+          var elementText = element.asText().getText();
+          // This check is necessary to exclude images, which return a blank
+          // text element.
+          if (elementText != '') {
+            text.push(elementText);
+          }
+        }
+      }
+    }
+    if (text.length == 0) {
+      throw 'Please select some text.';
+    }
+    return text;
+  } else {
+    throw 'Please select some text.';
+  }
+}
